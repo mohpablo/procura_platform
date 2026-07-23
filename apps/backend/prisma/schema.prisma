@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  SUPPLIER
+  BUYER
+}
+
+enum BusinessType {
+  BUYER
+  SUPPLIER
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  fullName     String   @map("full_name")
+  phoneNumber  String?  @map("phone_number")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  businesses Business[]
+
+  @@map("users")
+}
+
+model Business {
+  id          String       @id @default(uuid())
+  userId      String       @map("user_id")
+  type        BusinessType
+  companyName String       @map("company_name")
+  logoUrl     String?      @map("logo_url") @db.Text
+  isVerified  Boolean      @default(false) @map("is_verified")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addresses      Address[]
+  products       Product[] @relation("SupplierProducts")
+  buyerOrders    Order[]   @relation("BuyerOrders")
+  supplierOrders Order[]   @relation("SupplierOrders")
+
+  @@map("businesses")
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  businessId  String   @map("business_id")
+  addressLine String   @map("address_line") @db.Text
+  city        String
+  latitude    Decimal? @db.Decimal(10, 8)
+  longitude   Decimal? @db.Decimal(11, 8)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@map("addresses")
+}
+
+model Category {
+  id       String  @id @default(uuid())
+  parentId String? @map("parent_id")
+  name     String
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  supplierId    String   @map("supplier_id")
+  categoryId    String   @map("category_id")
+  name          String
+  description   String?  @db.Text
+  unitType      String   @map("unit_type") // e.g. "KG", "BOX", "BAG", "LITER"
+  pricePerUnit  Decimal  @map("price_per_unit") @db.Decimal(10, 2)
+  minOrderQty   Int      @default(1) @map("min_order_qty")
+  coverImageUrl String?  @map("cover_image_url") @db.Text
+  isAvailable   Boolean  @default(true) @map("is_available")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  supplier   Business       @relation("SupplierProducts", fields: [supplierId], references: [id], onDelete: Cascade)
+  category   Category       @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String @id @default(uuid())
+  productId String @map("product_id")
+  url       String @db.Text
+  sortOrder Int    @default(0) @map("sort_order")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  buyerId           String      @map("buyer_id")
+  supplierId        String      @map("supplier_id")
+  shippingAddressId String      @map("shipping_address_id")
+  status            OrderStatus @default(PENDING)
+  totalAmount       Decimal     @map("total_amount") @db.Decimal(10, 2)
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  buyer           Business    @relation("BuyerOrders", fields: [buyerId], references: [id])
+  supplier        Business    @relation("SupplierOrders", fields: [supplierId], references: [id])
+  shippingAddress Address     @relation(fields: [shippingAddressId], references: [id])
+  items           OrderItem[]
+  shipment        Shipment?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  orderId    String  @map("order_id")
+  productId  String  @map("product_id")
+  quantity   Int
+  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2)
+  totalPrice Decimal @map("total_price") @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Shipment {
+  id               String   @id @default(uuid())
+  orderId          String   @unique @map("order_id")
+  logisticsPartner String   @map("logistics_partner")
+  trackingNumber   String?  @map("tracking_number")
+  status           String   @default("DISPATCHED")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("shipments")
+}
