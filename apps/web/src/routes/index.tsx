@@ -3,7 +3,7 @@ import AuthPage from "../pages/AuthPage";
 
 export const router = createBrowserRouter([
   {
-    path: "/Auth",
+    index:true,
     element: <AuthPage />,
   },
 ]);
