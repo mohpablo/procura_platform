@@ -22,7 +22,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen w-full bg-[#f7f9fb] text-[#191c1e] flex flex-col justify-between font-sans antialiased selection:bg-[#6cf8bb] selection:text-[#002113]">
       {/* Header Bar */}
-      <header className="w-full max-w-[1440px] mx-auto px-6 sm:px-8 py-5 flex justify-between items-center border-b border-[#e0e3e5]">
+      <header className="w-full max-w-360 mx-auto px-6 sm:px-8 py-5 flex justify-between items-center border-b border-[#e0e3e5]">
         {/* Brand Logo & Name */}
         <a
           href="/"
@@ -58,7 +58,7 @@ export default function AuthPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="w-full max-w-[1440px] mx-auto px-6 sm:px-8 py-10 flex-1 flex items-center justify-center">
+      <main className="w-full max-w-360 mx-auto px-6 sm:px-8 py-10 flex-1 flex items-center justify-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Startup Value Proposition */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-8">
@@ -215,7 +215,7 @@ export default function AuthPage() {
       </main>
 
       {/* Footer Bar */}
-      <footer className="w-full max-w-[1440px] mx-auto px-6 sm:px-8 py-5 border-t border-[#e0e3e5] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#76777d]">
+      <footer className="w-full max-w-360 mx-auto px-6 sm:px-8 py-5 border-t border-[#e0e3e5] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#76777d]">
         <div className="flex items-center gap-2">
           <span>
             &copy; {new Date().getFullYear()} Procura Technologies, Inc.
