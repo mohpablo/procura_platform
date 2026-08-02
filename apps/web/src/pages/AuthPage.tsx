@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Lock,
   Mail,
@@ -8,72 +7,78 @@ import {
   Zap,
   TrendingUp,
   Sparkles,
+  Network,
 } from "lucide-react";
+import { useSignin } from "../hooks/useAuth";
+import { useForm } from "react-hook-form";
+import { signInSchema, type SignInDto } from "@procura/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function AuthPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { Signin, isPending } = useSignin();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignInDto>({
+    resolver: zodResolver(signInSchema),
+    mode: "onBlur",
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Authentication logic here
+  const onSubmit = (data: SignInDto) => {
+    Signin(data);
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#f7f9fb] text-[#191c1e] flex flex-col justify-between font-sans antialiased selection:bg-[#6cf8bb] selection:text-[#002113]">
+    <div className="min-h-screen bg-surface font-sans text-on-surface antialiased flex flex-col relative overflow-hidden">
       {/* Header Bar */}
-      <header className="w-full max-w-360 mx-auto px-6 sm:px-8 py-5 flex justify-between items-center border-b border-[#e0e3e5]">
-        {/* Brand Logo & Name */}
-        <a
-          href="/"
-          className="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[#000000] rounded p-0.5"
-        >
-          <img
-            src="/logo.jpeg"
-            alt="Procura Logo"
-            className="h-8 w-auto object-contain rounded-sm"
-          />
-          <div className="flex flex-col">
-            <span className="text-lg font-bold tracking-tight text-[#191c1e] leading-none">
-              PROCURA
+      <header className="relative z-10 w-full border-b border-outline-variant/60 bg-surface/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-360 items-center justify-between px-4 md:px-8">
+          <a href="/" className="flex items-center gap-2.5">
+            <span className="relative flex size-8 items-center justify-center rounded-lg bg-primary">
+              <Network className="size-4 text-on-primary" strokeWidth={2.2} />
             </span>
-            <span className="text-[10px] font-semibold text-[#45464d] tracking-widest uppercase mt-0.5">
-              Next-Gen Procurement
+            <span className="text-title-md tracking-tight font-semibold">
+              Procura
             </span>
-          </div>
-        </a>
+          </a>
 
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded bg-[#eceef0] border border-[#c6c6cd]">
-            <span className="w-2 h-2 rounded-full bg-[#006c49] animate-pulse"></span>
-            <span className="text-xs font-medium text-[#45464d]">
-              v1.0 Platform Live
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-[#45464d] text-xs font-semibold uppercase tracking-wider">
-            <Globe2 className="w-4 h-4 text-[#76777d]" />
-            <span>EN-US</span>
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant bg-surface-container-lowest">
+              <span className="relative flex size-1.5">
+                <span className="absolute inline-flex size-full rounded-full bg-secondary animate-pulse-ring" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-secondary" />
+              </span>
+              <span className="text-label-sm uppercase text-on-surface-variant font-medium">
+                v1.0 Platform Live
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-label-sm uppercase text-on-surface-variant font-medium">
+              <Globe2 className="size-4 text-outline" />
+              <span>EN-US</span>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="w-full max-w-360 mx-auto px-6 sm:px-8 py-10 flex-1 flex items-center justify-center">
+      <main className="relative z-10 flex-1 flex items-center justify-center w-full max-w-360 mx-auto px-4 py-12 md:px-8">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Startup Value Proposition */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-8">
-            <div className="inline-flex items-center gap-2 bg-[#ffffff] border border-[#c6c6cd] px-3 py-1 rounded w-fit">
-              <Sparkles className="w-4 h-4 text-[#006c49]" />
-              <span className="text-xs font-semibold tracking-wider uppercase text-[#45464d]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest px-3 py-1.5 w-fit">
+              <Sparkles className="size-4 text-secondary" />
+              <span className="text-label-sm uppercase text-on-surface-variant font-medium">
                 Modern B2B Purchasing Engine
               </span>
             </div>
 
-            <div className="space-y-3 max-w-2xl">
-              <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-bold tracking-tight text-[#191c1e] leading-[1.15]">
-                Automate your purchasing. Scale your business faster.
+            <div className="space-y-6 max-w-2xl">
+              <h1 className="text-[40px] leading-11.5 font-bold tracking-[-0.02em] md:text-display-lg text-on-surface">
+                Automate your Business. Scale your business faster.
               </h1>
-              <p className="text-base text-[#45464d] leading-relaxed">
+              <p className="text-body-lg text-on-surface-variant max-w-xl">
                 Replace manual spreadsheets with instant PO generation,
                 automated vendor approvals, and real-time spend analytics
                 designed for modern teams.
@@ -81,45 +86,51 @@ export default function AuthPage() {
             </div>
 
             {/* Feature Highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#e0e3e5]">
-              <div className="bg-[#ffffff] border border-[#c6c6cd] p-4 rounded flex items-start gap-3">
-                <div className="p-2 bg-[#eceef0] rounded text-[#191c1e]">
-                  <Zap className="w-4 h-4" />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-outline-variant">
+              <div className="group rounded-xl border border-outline-variant bg-surface-container-lowest p-6 transition-all duration-300 hover:-translate-y-1 hover:border-outline hover:bg-surface-container-low flex items-start gap-4">
+                <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary-container transition-colors duration-300 group-hover:bg-secondary">
+                  <Zap
+                    className="size-5 text-on-primary-container group-hover:text-on-secondary"
+                    strokeWidth={2}
+                  />
+                </span>
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#191c1e]">
+                  <h4 className="text-title-md font-bold text-on-surface">
                     Instant Setup
                   </h4>
-                  <p className="text-xs text-[#45464d] mt-1 leading-normal">
+                  <p className="text-body-md text-on-surface-variant mt-1.5">
                     Connect vendors and issue purchase orders in minutes.
                   </p>
                 </div>
               </div>
 
-              <div className="bg-[#ffffff] border border-[#c6c6cd] p-4 rounded flex items-start gap-3">
-                <div className="p-2 bg-[#eceef0] rounded text-[#191c1e]">
-                  <TrendingUp className="w-4 h-4" />
-                </div>
+              <div className="group rounded-xl border border-outline-variant bg-surface-container-lowest p-6 transition-all duration-300 hover:-translate-y-1 hover:border-outline hover:bg-surface-container-low flex items-start gap-4">
+                <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-secondary-container transition-colors duration-300">
+                  <TrendingUp
+                    className="size-5 text-on-secondary-container"
+                    strokeWidth={2}
+                  />
+                </span>
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#191c1e]">
+                  <h4 className="text-title-md font-bold text-on-surface">
                     Spend Control
                   </h4>
-                  <p className="text-xs text-[#45464d] mt-1 leading-normal">
+                  <p className="text-body-md text-on-surface-variant mt-1.5">
                     Smart budgets and real-time approval workflows.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 pt-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#76777d]">
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <span className="text-label-sm uppercase text-outline font-medium">
                 Backed by modern teams at
               </span>
-              <div className="flex items-center gap-3 text-xs font-bold text-[#45464d]">
+              <div className="flex items-center gap-4 text-label-sm font-bold text-on-surface-variant">
                 <span>TECHFLOW</span>
-                <span>•</span>
+                <span className="text-outline-variant">•</span>
                 <span>HYPERLOGIC</span>
-                <span>•</span>
+                <span className="text-outline-variant">•</span>
                 <span>SCALE LABS</span>
               </div>
             </div>
@@ -127,110 +138,124 @@ export default function AuthPage() {
 
           {/* Right Column: Direct Login Panel */}
           <div className="lg:col-span-5 w-full max-w-md mx-auto">
-            <div className="bg-[#ffffff] border border-[#c6c6cd] rounded p-6 sm:p-8 space-y-6">
-              <div className="space-y-1.5 border-b border-[#e0e3e5] pb-4">
-                <h2 className="text-xl font-semibold text-[#191c1e] tracking-tight">
+            <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest p-6 sm:p-8 shadow-[0_24px_60px_-24px_rgba(19,27,46,0.25)]">
+              <div className="space-y-2 border-b border-outline-variant pb-6">
+                <h2 className="text-headline-lg font-bold text-on-surface">
                   Log in to Procura
                 </h2>
-                <p className="text-xs text-[#45464d]">
+                <p className="text-body-md text-on-surface-variant">
                   Enter your team credentials to access your workspace.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Hook up handleSubmit wrapper */}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-6">
                 {/* Email Input */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label
                     htmlFor="email"
-                    className="block text-xs font-semibold uppercase tracking-wider text-[#45464d]"
+                    className="block text-label-sm uppercase text-on-surface-variant font-medium"
                   >
                     Work Email
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#76777d]">
-                      <Mail className="w-4 h-4" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline">
+                      <Mail className="size-5" />
                     </div>
                     <input
                       id="email"
                       type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      {...register("email")}
                       placeholder="you@company.com"
-                      className="w-full pl-9 pr-3 py-2 text-sm bg-[#ffffff] border border-[#c6c6cd] rounded text-[#191c1e] placeholder-[#76777d] transition-colors focus:outline-none focus:border-[#009485] focus:ring-1 focus:ring-[#009485]"
+                      className="w-full rounded-lg border border-outline-variant bg-surface pl-12 pr-4 py-3.5 text-body-lg text-on-surface placeholder:text-outline transition-colors focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-xs text-error mt-1">{errors.email.message}</p>
+                  )}
                 </div>
 
                 {/* Password Input */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label
                     htmlFor="password"
-                    className="block text-xs font-semibold uppercase tracking-wider text-[#45464d]"
+                    className="block text-label-sm uppercase text-on-surface-variant font-medium"
                   >
                     Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#76777d]">
-                      <Lock className="w-4 h-4" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline">
+                      <Lock className="size-5" />
                     </div>
                     <input
                       id="password"
                       type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      {...register("password")}
                       placeholder="••••••••••••"
-                      className="w-full pl-9 pr-3 py-2 text-sm bg-[#ffffff] border border-[#c6c6cd] rounded text-[#191c1e] placeholder-[#76777d] transition-colors focus:outline-none focus:border-[#009485] focus:ring-1 focus:ring-[#009485]"
+                      className="w-full rounded-lg border border-outline-variant bg-surface pl-12 pr-4 py-3.5 text-body-lg text-on-surface placeholder:text-outline transition-colors focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
                     />
                   </div>
+                  {errors.password && (
+                    <p className="text-xs text-error mt-1">{errors.password.message}</p>
+                  )}
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#000000] hover:bg-[#131b2e] text-[#ffffff] font-medium py-2.5 px-4 rounded text-sm transition-colors flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#000000] pt-3"
+                  disabled={isPending}
+                  className="group mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 text-body-lg font-semibold text-on-primary transition-transform duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span>Log In to Workspace</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  <span>{isPending ? "Logging in..." : "Log In to Workspace"}</span>
+                  {!isPending && (
+                    <ArrowRight className="size-5 transition-transform duration-200 group-hover:translate-x-1" />
+                  )}
                 </button>
               </form>
 
               {/* Security Pill */}
-              <div className="bg-[#f2f4f6] border border-[#e0e3e5] p-3 rounded flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-[#006c49] shrink-0" />
-                <span className="text-[11px] text-[#45464d] leading-tight">
+              <div className="mt-8 flex items-start gap-3 rounded-lg border border-outline-variant bg-surface-container-low p-4">
+                <ShieldCheck className="size-5 shrink-0 text-secondary" />
+                <p className="text-body-md text-on-surface-variant">
                   Bank-level SSL encryption protecting your procurement data.
-                </span>
+                </p>
               </div>
             </div>
 
             {/* Context Footer */}
-            <p className="text-center text-[11px] text-[#76777d] mt-4">
-              Need an account invite? Contact your team manager or system
-              administrator.
+            <p className="mt-6 text-center text-body-md text-on-surface-variant">
+              Need an account invite?{" "}
+              <a
+                href="#"
+                className="font-semibold text-on-surface hover:text-secondary transition-colors"
+              >
+                Contact your manager
+              </a>
+              .
             </p>
           </div>
         </div>
       </main>
 
       {/* Footer Bar */}
-      <footer className="w-full max-w-360 mx-auto px-6 sm:px-8 py-5 border-t border-[#e0e3e5] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#76777d]">
-        <div className="flex items-center gap-2">
-          <span>
-            &copy; {new Date().getFullYear()} Procura Technologies, Inc.
-          </span>
-        </div>
-        <div className="flex gap-6 text-xs font-medium text-[#45464d]">
-          <a href="#privacy" className="hover:text-[#191c1e] transition-colors">
-            Privacy Policy
-          </a>
-          <a href="#terms" className="hover:text-[#191c1e] transition-colors">
-            Terms of Service
-          </a>
-          <a href="#support" className="hover:text-[#191c1e] transition-colors">
-            Contact Support
-          </a>
+      <footer className="relative z-10 w-full border-t border-outline-variant/60 bg-surface/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-360 flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between md:px-8 text-body-md text-on-surface-variant">
+          <div className="flex items-center gap-2">
+            <span>
+              &copy; {new Date().getFullYear()} Procura Technologies, Inc.
+            </span>
+          </div>
+          <div className="flex gap-6 font-medium">
+            <a href="#privacy" className="hover:text-on-surface transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#terms" className="hover:text-on-surface transition-colors">
+              Terms of Service
+            </a>
+            <a href="#support" className="hover:text-on-surface transition-colors">
+              Contact Support
+            </a>
+          </div>
         </div>
       </footer>
     </div>
