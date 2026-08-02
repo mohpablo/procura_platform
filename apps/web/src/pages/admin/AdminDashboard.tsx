@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Users,
   ShoppingBag,
@@ -33,6 +32,11 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import CustomTooltip from "../../components/ui/CustomTooltip";
+import ChartCard from "../../components/ui/ChartCard";
+import ActivityItem from "../../components/ui/ActivityItem";
+import KpiCard from "../../components/ui/KpiCard";
+import StatusChip from "../../components/ui/StatusChip";
 
 // --- Mock Data ---
 const ordersData = [
@@ -428,128 +432,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-}
-
-// --- Subcomponents ---
-
-function KpiCard({
-  title,
-  value,
-  icon,
-  color = "text-on-surface-variant",
-}: {
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  color?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm transition-all hover:bg-surface-container-low">
-      <div className="flex items-center justify-between">
-        <span className="text-label-sm text-on-surface-variant uppercase tracking-wider">
-          {title}
-        </span>
-        <div className={`[&>svg]:size-5 ${color}`}>{icon}</div>
-      </div>
-      <span className="text-headline-lg text-on-surface">{value}</span>
-    </div>
-  );
-}
-
-function StatusChip({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-surface-container-low p-4 text-center">
-      <div className="text-on-surface-variant [&>svg]:size-6">{icon}</div>
-      <span className="text-title-md text-on-surface">{value}</span>
-      <span className="text-label-sm text-on-surface-variant">{label}</span>
-    </div>
-  );
-}
-
-function ActivityItem({
-  title,
-  desc,
-  time,
-  icon,
-  color = "text-on-surface-variant",
-}: {
-  title: string;
-  desc: string;
-  time: string;
-  icon: React.ReactNode;
-  color?: string;
-}) {
-  return (
-    <div className="relative pl-10">
-      <div
-        className={`absolute left-0 top-1 flex size-6 items-center justify-center rounded-full bg-surface-container border-2 border-surface-container-lowest ${color}`}
-      >
-        {icon}
-      </div>
-      <div className="flex flex-col">
-        <span className="text-body-md font-medium text-on-surface">
-          {title}
-        </span>
-        <span className="text-body-md text-on-surface-variant">{desc}</span>
-        <span className="text-label-sm text-outline mt-1">{time}</span>
-      </div>
-    </div>
-  );
-}
-
-function ChartCard({
-  title,
-  className = "",
-  children,
-}: {
-  title: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={`flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm ${className}`}
-    >
-      <h3 className="text-title-md text-on-surface mb-4">{title}</h3>
-      <div className="w-full h-65">{children}</div>
-    </div>
-  );
-}
-
-function CustomTooltip({ active, payload, label }: any) {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded-lg border border-outline-variant bg-surface-container-high p-3 shadow-md z-50 relative">
-        {label && (
-          <p className="text-label-sm text-on-surface mb-1 font-semibold">
-            {label}
-          </p>
-        )}
-        {payload.map((entry: any, index: number) => (
-          <p
-            key={index}
-            className="text-body-md text-on-surface flex items-center justify-between gap-4"
-          >
-            <span className="font-semibold capitalize">
-              {entry.name || entry.dataKey}:
-            </span>
-            <span className="font-bold text-on-surface">
-              {typeof entry.value === "number"
-                ? entry.value.toLocaleString()
-                : entry.value}
-            </span>
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
 }
