@@ -32,15 +32,22 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  role         Role     @default(BUYER)
-  fullName     String   @map("full_name")
-  phoneNumber  String?  @map("phone_number")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         Role      @default(BUYER)
+  fullName     String    @map("full_name")
+  phoneNumber  String?   @map("phone_number")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at") // Soft Delete
 
   businesses Business[]
 
@@ -56,24 +63,43 @@ model Business {
   isVerified  Boolean      @default(false) @map("is_verified")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
+  deletedAt   DateTime?    @map("deleted_at") // Soft Delete
 
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   addresses      Address[]
-  products       Product[] @relation("SupplierProducts")
-  buyerOrders    Order[]   @relation("BuyerOrders")
-  supplierOrders Order[]   @relation("SupplierOrders")
+  products       Product[]          @relation("SupplierProducts")
+  buyerOrders    Order[]            @relation("BuyerOrders")
+  supplierOrders Order[]            @relation("SupplierOrders")
+  documents      BusinessDocument[]
 
   @@map("businesses")
 }
 
+model BusinessDocument {
+  id         String         @id @default(uuid())
+  businessId String         @map("business_id")
+  type       String         // e.g., TAX_CARD, COMMERCIAL_REGISTER
+  fileUrl    String         @map("file_url") @db.Text
+  status     DocumentStatus @default(PENDING) // PENDING, APPROVED, REJECTED
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
+  deletedAt  DateTime?      @map("deleted_at") // Soft Delete
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("business_documents")
+}
+
 model Address {
-  id          String   @id @default(uuid())
-  businessId  String   @map("business_id")
-  addressLine String   @map("address_line") @db.Text
+  id          String    @id @default(uuid())
+  businessId  String    @map("business_id")
+  addressLine String    @map("address_line") @db.Text
   city        String
-  latitude    Decimal? @db.Decimal(10, 8)
-  longitude   Decimal? @db.Decimal(11, 8)
-  createdAt   DateTime @default(now()) @map("created_at")
+  latitude    Decimal?  @db.Decimal(10, 8)
+  longitude   Decimal?  @db.Decimal(11, 8)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at") // Soft Delete
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   orders   Order[]
@@ -82,9 +108,10 @@ model Address {
 }
 
 model Category {
-  id       String  @id @default(uuid())
-  parentId String? @map("parent_id")
+  id       String    @id @default(uuid())
+  parentId String?   @map("parent_id")
   name     String
+  deletedAt DateTime? @map("deleted_at") // Soft Delete
 
   parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children Category[] @relation("CategoryHierarchy")
@@ -94,21 +121,23 @@ model Category {
 }
 
 model Product {
-  id            String   @id @default(uuid())
-  supplierId    String   @map("supplier_id")
-  categoryId    String   @map("category_id")
+  id            String    @id @default(uuid())
+  supplierId    String    @map("supplier_id")
+  categoryId    String    @map("category_id")
   name          String
-  description   String?  @db.Text
-  unitType      String   @map("unit_type") // e.g. "KG", "BOX", "BAG", "LITER"
-  pricePerUnit  Decimal  @map("price_per_unit") @db.Decimal(10, 2)
-  minOrderQty   Int      @default(1) @map("min_order_qty")
-  coverImageUrl String?  @map("cover_image_url") @db.Text
-  isAvailable   Boolean  @default(true) @map("is_available")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  description   String?   @db.Text
+  unitType      String    @map("unit_type") // e.g. "KG", "BOX", "BAG", "LITER"
+  pricePerUnit  Decimal   @map("price_per_unit") @db.Decimal(10, 2)
+  minOrderQty   Int       @default(1) @map("min_order_qty")
+  coverImageUrl String?   @map("cover_image_url") @db.Text
+  isAvailable   Boolean   @default(true) @map("is_available")
+  isApproved    Boolean   @default(false) @map("is_approved") // Product Approval field
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at") // Soft Delete
 
-  supplier   Business       @relation("SupplierProducts", fields: [supplierId], references: [id], onDelete: Cascade)
-  category   Category       @relation(fields: [categoryId], references: [id])
+  supplier   Business     @relation("SupplierProducts", fields: [supplierId], references: [id], onDelete: Cascade)
+  category   Category     @relation(fields: [categoryId], references: [id])
   images     ProductImage[]
   orderItems OrderItem[]
 
@@ -116,10 +145,11 @@ model Product {
 }
 
 model ProductImage {
-  id        String @id @default(uuid())
-  productId String @map("product_id")
-  url       String @db.Text
-  sortOrder Int    @default(0) @map("sort_order")
+  id        String    @id @default(uuid())
+  productId String    @map("product_id")
+  url       String    @db.Text
+  sortOrder Int       @default(0) @map("sort_order")
+  deletedAt DateTime? @map("deleted_at") // Soft Delete
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -135,6 +165,7 @@ model Order {
   totalAmount       Decimal     @map("total_amount") @db.Decimal(10, 2)
   createdAt         DateTime    @default(now()) @map("created_at")
   updatedAt         DateTime    @updatedAt @map("updated_at")
+  deletedAt         DateTime?   @map("deleted_at") // Soft Delete
 
   buyer           Business    @relation("BuyerOrders", fields: [buyerId], references: [id])
   supplier        Business    @relation("SupplierOrders", fields: [supplierId], references: [id])
@@ -146,12 +177,13 @@ model Order {
 }
 
 model OrderItem {
-  id         String  @id @default(uuid())
-  orderId    String  @map("order_id")
-  productId  String  @map("product_id")
+  id         String    @id @default(uuid())
+  orderId    String    @map("order_id")
+  productId  String    @map("product_id")
   quantity   Int
-  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2)
-  totalPrice Decimal @map("total_price") @db.Decimal(10, 2)
+  unitPrice  Decimal   @map("unit_price") @db.Decimal(10, 2)
+  totalPrice Decimal   @map("total_price") @db.Decimal(10, 2)
+  deletedAt  DateTime? @map("deleted_at") // Soft Delete
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -160,13 +192,14 @@ model OrderItem {
 }
 
 model Shipment {
-  id               String   @id @default(uuid())
-  orderId          String   @unique @map("order_id")
-  logisticsPartner String   @map("logistics_partner")
-  trackingNumber   String?  @map("tracking_number")
-  status           String   @default("DISPATCHED")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id               String    @id @default(uuid())
+  orderId          String    @unique @map("order_id")
+  logisticsPartner String    @map("logistics_partner")
+  trackingNumber   String?   @map("tracking_number")
+  status           String    @default("DISPATCHED")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at") // Soft Delete
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
