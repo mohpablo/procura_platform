@@ -26,6 +26,7 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "generated/**/*.d.ts",
-    "generated/**/*.ts"
+    "generated/**/*.ts",
+    "prisma/seed.ts"
   ]
 }

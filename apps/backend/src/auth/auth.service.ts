@@ -27,24 +27,21 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.signToken(user.id, user.email);
+    return this.signToken(user.id, user.email, user.role);
   }
 
   async signToken(
     userId: string,
     email: string,
+    role: string,
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
+      role,
     };
 
-    const secret = process.env.JWT_SECRET;
-
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: '7d',
-      secret: secret,
-    });
+    const token = await this.jwt.signAsync(payload);
 
     return {
       access_token: token,

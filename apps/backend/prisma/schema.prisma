@@ -4,7 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider     = "prisma-client"
+  provider     = "prisma-client-js"
   output       = "../generated/prisma"
   moduleFormat = "cjs"
 }
@@ -70,15 +70,15 @@ model Business {
   products       Product[]          @relation("SupplierProducts")
   buyerOrders    Order[]            @relation("BuyerOrders")
   supplierOrders Order[]            @relation("SupplierOrders")
-  documents      BusinessDocument[]
+  documents      VerificationDocument[]
 
   @@map("businesses")
 }
 
-model BusinessDocument {
+model VerificationDocument {
   id         String         @id @default(uuid())
   businessId String         @map("business_id")
-  type       String         // e.g., TAX_CARD, COMMERCIAL_REGISTER
+  type       String // e.g., TAX_CARD, COMMERCIAL_REGISTER
   fileUrl    String         @map("file_url") @db.Text
   status     DocumentStatus @default(PENDING) // PENDING, APPROVED, REJECTED
   createdAt  DateTime       @default(now()) @map("created_at")
@@ -108,9 +108,9 @@ model Address {
 }
 
 model Category {
-  id       String    @id @default(uuid())
-  parentId String?   @map("parent_id")
-  name     String
+  id        String    @id @default(uuid())
+  parentId  String?   @map("parent_id")
+  name      String
   deletedAt DateTime? @map("deleted_at") // Soft Delete
 
   parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
@@ -136,8 +136,8 @@ model Product {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   deletedAt     DateTime? @map("deleted_at") // Soft Delete
 
-  supplier   Business     @relation("SupplierProducts", fields: [supplierId], references: [id], onDelete: Cascade)
-  category   Category     @relation(fields: [categoryId], references: [id])
+  supplier   Business       @relation("SupplierProducts", fields: [supplierId], references: [id], onDelete: Cascade)
+  category   Category       @relation(fields: [categoryId], references: [id])
   images     ProductImage[]
   orderItems OrderItem[]
 
